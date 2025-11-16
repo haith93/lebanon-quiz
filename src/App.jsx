@@ -143,22 +143,41 @@ function App() {
     }
   }, [quizStarted, timeRemaining]);
 
-  const handleLogin = () => {
-    // if (adminPassword === import.meta.env.VITE_ADMIN_PASSWORD || 'rz.admin') {
-    if (adminPassword === 'rz.admin') {
+  // const handleLogin = () => {
+  //   // if (adminPassword === import.meta.env.VITE_ADMIN_PASSWORD || 'rz.admin') {
+  //   if (adminPassword === 'rz.admin') {
   
-      setView('admin');
-      return;
-    }
+  //     setView('admin');
+  //     return;
+  //   }
 
-    const codeObj = accessCodes.find(c => c.code === accessCode.toUpperCase() && !c.used);
-    if (codeObj && teamName.trim()) {
-      setCurrentTeam({ name: teamName, code: accessCode.toUpperCase() });
-      setView('quiz');
-    } else {
-      alert('رمز غير صالح أو مستخدم بالفعل');
-    }
-  };
+  //   const codeObj = accessCodes.find(c => c.code === accessCode.toUpperCase() && !c.used);
+  //   if (codeObj && teamName.trim()) {
+  //     setCurrentTeam({ name: teamName, code: accessCode.toUpperCase() });
+  //     setView('quiz');
+  //   } else {
+  //     alert('رمز غير صالح أو مستخدم بالفعل');
+  //   }
+  // };
+
+  const handleLogin = () => {
+  const codeObj = accessCodes.find(c => c.code === accessCode.toUpperCase());
+  if (codeObj && teamName.trim()) {
+    setCurrentTeam({ name: teamName, code: accessCode.toUpperCase() });
+    setView('quiz');
+  } else {
+    alert('رمز غير صالح');
+  }
+};
+
+const handleAdminLogin = () => {
+  // if (adminPassword === import.meta.env.VITE_ADMIN_PASSWORD || adminPassword === 'rz.admin') {
+  if (adminPassword === import.meta.env.VITE_ADMIN_PASSWORD ) {
+    setView('admin');
+  } else {
+    alert('كلمة مرور خاطئة');
+  }
+};
 
   const startQuiz = () => {
     if (questions.length === 0) {
@@ -245,51 +264,72 @@ function App() {
   };
 
   if (view === 'login') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-100 via-white to-red-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-emerald-700 mb-3">🇱🇧 مسابقة لبنان</h1>
-            <p className="text-gray-700 text-lg">اختبر معلوماتك عن لبنان</p>
+  return (
+    <div className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-emerald-100 via-white to-red-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-emerald-700 mb-3">🇱🇧 مسابقة لبنان</h1>
+          <p className="text-gray-700 text-lg">اختبر معلوماتك عن لبنان</p>
+        </div>
+
+        {/* Team Login Section */}
+        <div className="space-y-4 mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">دخول الفريق</h2>
+          <input
+            type="text"
+            placeholder="اسم الفريق"
+            value={teamName}
+            onChange={(e) => setTeamName(e.target.value)}
+            className="w-full bg-white px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-emerald-500 focus:outline-none text-right text-gray-900"
+          />
+          <input
+            type="text"
+            placeholder="رمز الدخول"
+            value={accessCode}
+            onChange={(e) => setAccessCode(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+            className="w-full bg-white px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-emerald-500 focus:outline-none text-center uppercase text-gray-900 tracking-wider"
+          />
+          <button
+            onClick={handleLogin}
+            className="w-full bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition font-semibold text-lg shadow-lg"
+          >
+            دخول المسابقة
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
           </div>
-
-          <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="اسم الفريق"
-              value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
-              className="w-full px-4 py-3 border-2 bg-white border-gray-300 rounded-xl focus:border-emerald-500 focus:outline-none text-right text-gray-900"
-            />
-            <input
-              type="text"
-              placeholder="رمز الدخول"
-              value={accessCode}
-              onChange={(e) => setAccessCode(e.target.value)}
-              className="w-full px-4 py-3 border-2 bg-white border-gray-300 rounded-xl focus:border-emerald-500 focus:outline-none text-center uppercase text-gray-900 tracking-wider"
-            />
-            <button
-              onClick={handleLogin}
-              className="w-full bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition font-semibold text-lg shadow-lg"
-            >
-              دخول
-            </button>
-
-            <div className="text-center mt-6 pt-6 border-t border-gray-200">
-              <input
-                type="password"
-                placeholder="كلمة مرور المسؤول"
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                className="w-full px-4 py-2 border bg-white border-gray-300 rounded-xl focus:border-red-500 focus:outline-none text-center text-sm text-gray-900"
-              />
-            </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-white text-gray-500">أو</span>
           </div>
         </div>
+
+        {/* Admin Login Section */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">دخول المسؤول</h2>
+          <input
+            type="password"
+            placeholder="كلمة مرور المسؤول"
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
+            className="w-full bg-white px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:outline-none text-center text-gray-900"
+          />
+          <button
+            onClick={handleAdminLogin}
+            className="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition font-semibold text-lg shadow-lg"
+          >
+            دخول لوحة التحكم
+          </button>
+        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (view === 'admin') {
     return (
