@@ -12,6 +12,9 @@ build/
 .env
 .env.local
 .env.production
+.env.development
+backend/.env
+EOF
 
 # IDE
 .vscode/
