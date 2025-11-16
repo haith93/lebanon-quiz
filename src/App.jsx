@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import * as lucide from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://localhost:5000/api' || import.meta.env.VITE_API_URL || '/.netlify/functions/api';
+
 
 function App() {
   const [view, setView] = useState('login');
