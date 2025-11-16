@@ -1,9 +1,15 @@
+
+
+
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import * as lucide from 'lucide-react';
+// const API_URL = 'http://localhost:5000/api' || import.meta.env.VITE_API_URL;
+// // const API_URL = 'http://localhost:5000/api' || import.meta.env.VITE_API_URL || '/.netlify/functions/api';
 
-const API_URL = 'http://localhost:5000/api' || import.meta.env.VITE_API_URL || '/.netlify/functions/api';
-
+// console.log('API_URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/v1');
+// // const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/v1';
 
 function App() {
   const [view, setView] = useState('login');
@@ -35,8 +41,8 @@ function App() {
       const [questionsRes, teamsRes, codesRes, durationRes] = await Promise.all([
         axios.get(`${API_URL}/questions`),
         axios.get(`${API_URL}/teams`),
-        axios.get(`${API_URL}/codes`),
-        axios.get(`${API_URL}/settings/duration`)
+        axios.get(`${API_URL}/access`),
+        axios.get(`${API_URL}/config/duration`)
       ]);
 
       setQuestions(questionsRes.data);
@@ -73,7 +79,7 @@ function App() {
 
   const updateDuration = async (duration) => {
     try {
-      await axios.put(`${API_URL}/settings/duration`, { duration });
+      await axios.put(`${API_URL}/config/duration`, { duration });
       setQuizDuration(duration);
       setTimeRemaining(duration);
     } catch (error) {
@@ -88,7 +94,7 @@ function App() {
     }
 
     try {
-      const res = await axios.post(`${API_URL}/codes`, { 
+      const res = await axios.post(`${API_URL}/access`, { 
         teamName: codeTeamName,
         forceNew 
       });
@@ -106,7 +112,7 @@ function App() {
   const resetAllData = async () => {
     if (window.confirm('هل أنت متأكد من حذف جميع النتائج والرموز؟ هذا الإجراء لا يمكن التراجع عنه!')) {
       try {
-        await axios.delete(`${API_URL}/reset`);
+        await axios.delete(`${API_URL}/data/reset`);
         loadData();
         setGeneratedCode('');
         setCodeTeamName('');
@@ -197,7 +203,7 @@ function App() {
         totalQuestions: questions.length
       });
 
-      await axios.put(`${API_URL}/codes/${currentTeam.code}`);
+      await axios.put(`${API_URL}/access/${currentTeam.code}`);
       
       loadData();
       setView('results');

@@ -49,10 +49,10 @@ const Team = mongoose.model('Team', TeamSchema);
 const AccessCode = mongoose.model('AccessCode', AccessCodeSchema);
 const Settings = mongoose.model('Settings', SettingsSchema);
 
-// API Routes
+// API Routes - Changed from /api/* to /v1/*
 
 // Get all questions
-app.get('/api/questions', async (req, res) => {
+app.get('/v1/questions', async (req, res) => {
   try {
     const questions = await Question.find();
     res.json(questions);
@@ -62,7 +62,7 @@ app.get('/api/questions', async (req, res) => {
 });
 
 // Add question
-app.post('/api/questions', async (req, res) => {
+app.post('/v1/questions', async (req, res) => {
   try {
     const question = new Question(req.body);
     await question.save();
@@ -73,7 +73,7 @@ app.post('/api/questions', async (req, res) => {
 });
 
 // Update question
-app.put('/api/questions/:id', async (req, res) => {
+app.put('/v1/questions/:id', async (req, res) => {
   try {
     const question = await Question.findByIdAndUpdate(
       req.params.id,
@@ -87,7 +87,7 @@ app.put('/api/questions/:id', async (req, res) => {
 });
 
 // Delete question
-app.delete('/api/questions/:id', async (req, res) => {
+app.delete('/v1/questions/:id', async (req, res) => {
   try {
     await Question.findByIdAndDelete(req.params.id);
     res.json({ success: true });
@@ -97,7 +97,7 @@ app.delete('/api/questions/:id', async (req, res) => {
 });
 
 // Get all teams
-app.get('/api/teams', async (req, res) => {
+app.get('/v1/teams', async (req, res) => {
   try {
     const teams = await Team.find().sort({ score: -1, completedAt: 1 });
     res.json(teams);
@@ -107,7 +107,7 @@ app.get('/api/teams', async (req, res) => {
 });
 
 // Add team result
-app.post('/api/teams', async (req, res) => {
+app.post('/v1/teams', async (req, res) => {
   try {
     const team = new Team(req.body);
     await team.save();
@@ -117,8 +117,8 @@ app.post('/api/teams', async (req, res) => {
   }
 });
 
-// Get all access codes
-app.get('/api/codes', async (req, res) => {
+// Get all access codes - Changed from /api/codes to /v1/access
+app.get('/v1/access', async (req, res) => {
   try {
     const codes = await AccessCode.find().sort({ createdAt: -1 });
     res.json(codes);
@@ -128,7 +128,7 @@ app.get('/api/codes', async (req, res) => {
 });
 
 // Generate or retrieve access code for a team
-app.post('/api/codes', async (req, res) => {
+app.post('/v1/access', async (req, res) => {
   try {
     const { teamName, forceNew } = req.body;
     
@@ -169,7 +169,7 @@ app.post('/api/codes', async (req, res) => {
 });
 
 // Mark code as used
-app.put('/api/codes/:code', async (req, res) => {
+app.put('/v1/access/:code', async (req, res) => {
   try {
     const accessCode = await AccessCode.findOneAndUpdate(
       { code: req.params.code },
@@ -182,8 +182,8 @@ app.put('/api/codes/:code', async (req, res) => {
   }
 });
 
-// Get quiz duration
-app.get('/api/settings/duration', async (req, res) => {
+// Get quiz duration - Changed from /api/settings/duration to /v1/config/duration
+app.get('/v1/config/duration', async (req, res) => {
   try {
     let setting = await Settings.findOne({ key: 'duration' });
     if (!setting) {
@@ -197,7 +197,7 @@ app.get('/api/settings/duration', async (req, res) => {
 });
 
 // Update quiz duration
-app.put('/api/settings/duration', async (req, res) => {
+app.put('/v1/config/duration', async (req, res) => {
   try {
     const setting = await Settings.findOneAndUpdate(
       { key: 'duration' },
@@ -210,8 +210,8 @@ app.put('/api/settings/duration', async (req, res) => {
   }
 });
 
-// Reset all data
-app.delete('/api/reset', async (req, res) => {
+// Reset all data - Changed from /api/reset to /v1/data/reset
+app.delete('/v1/data/reset', async (req, res) => {
   try {
     await Team.deleteMany({});
     await AccessCode.deleteMany({});
