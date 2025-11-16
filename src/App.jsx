@@ -9,7 +9,12 @@ import * as lucide from 'lucide-react';
 
 // console.log('API_URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/v1');
 // // const API_URL = 'http://localhost:5000/api';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/v1';
+// const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/v1';
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/v1' 
+  : '/v1';
+
+console.log('🔍 Final API_URL:', API_URL);
 
 function App() {
   const [view, setView] = useState('login');
