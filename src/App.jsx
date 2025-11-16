@@ -144,7 +144,9 @@ function App() {
   }, [quizStarted, timeRemaining]);
 
   const handleLogin = () => {
-    if (adminPassword === import.meta.env.VITE_ADMIN_PASSWORD || 'rz.admin') {
+    // if (adminPassword === import.meta.env.VITE_ADMIN_PASSWORD || 'rz.admin') {
+    if (adminPassword === 'rz.admin') {
+  
       setView('admin');
       return;
     }
