@@ -136,9 +136,11 @@ app.post('/v1/access', async (req, res) => {
       return res.status(400).json({ error: 'Team name is required' });
     }
 
-    // Check if team already has a code
+    const normalizedTeamName = teamName.trim().toLowerCase();
+
+    // Check if team already has a code (case-insensitive)
     const existingCode = await AccessCode.findOne({ 
-      teamName: teamName.trim(),
+      teamName: new RegExp(`^${normalizedTeamName}$`, 'i'),
       used: false 
     });
 
@@ -153,7 +155,7 @@ app.post('/v1/access', async (req, res) => {
     // Generate new code
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
     const accessCode = new AccessCode({ 
-      teamName: teamName.trim(), 
+      teamName: teamName.trim(), // Keep original case for display
       code 
     });
     await accessCode.save();

@@ -35,9 +35,9 @@ function App() {
   const [questions, setQuestions] = useState([]);
   const [teams, setTeams] = useState([]);
   const [accessCodes, setAccessCodes] = useState([]);
-
-  useEffect(() => {
-    loadData();
+  const [showAnswerFeedback, setShowAnswerFeedback] = useState(false);
+    useEffect(() => {
+      loadData();
   }, []);
 
   const loadData = async () => {
@@ -99,7 +99,7 @@ function App() {
 
     try {
       const res = await axios.post(`${API_URL}/access`, { 
-        teamName: codeTeamName,
+        teamName: codeTeamName.trim(),
         forceNew 
       });
       setGeneratedCode(res.data.code);
@@ -142,6 +142,8 @@ function App() {
       return () => clearInterval(timer);
     }
   }, [quizStarted, timeRemaining]);
+
+  
 
   // const handleLogin = () => {
   //   // if (adminPassword === import.meta.env.VITE_ADMIN_PASSWORD || 'rz.admin') {
@@ -193,10 +195,18 @@ const handleAdminLogin = () => {
   };
 
   const handleNext = () => {
+    if (!showAnswerFeedback) {
+      // First click: show feedback
+      setShowAnswerFeedback(true);
+      return;
+    }
+
+    // Second click: move to next question
     const newAnswers = [...answers];
     newAnswers[currentQuestionIndex] = selectedAnswer;
     setAnswers(newAnswers);
     setSelectedAnswer(null);
+    setShowAnswerFeedback(false);
 
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -268,6 +278,18 @@ const handleAdminLogin = () => {
     <div className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-emerald-100 via-white to-red-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 w-full max-w-md">
         <div className="text-center mb-8">
+          <div className="flex justify-center items-center gap-4 mb-4">
+    <img 
+      src="/logo11.png" 
+      alt="School Logo 1" 
+      className="w-[150px] h-[150px] object-contain"
+    />
+    <img 
+      src="/logo12.png" 
+      alt="School Logo 2" 
+      className="w-[150px] h-[150px] object-contain"
+    />
+  </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-emerald-700 mb-3">🇱🇧 مسابقة لبنان</h1>
           <p className="text-gray-700 text-lg">اختبر معلوماتك عن لبنان</p>
         </div>
@@ -413,7 +435,52 @@ const handleAdminLogin = () => {
               )}
             </div>
           </div>
-
+          {/* Access Codes Table */}
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2 text-gray-800">
+              <lucide.Key size={24} />
+              رموز الدخول المنشأة
+            </h2>
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <div className="inline-block min-w-full align-middle">
+                <table className="min-w-full border-collapse">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-4 py-3 text-right text-gray-800 font-semibold border border-gray-300">اسم الفريق</th>
+                      <th className="px-4 py-3 text-center text-gray-800 font-semibold border border-gray-300">الرمز</th>
+                      <th className="px-4 py-3 text-center text-gray-800 font-semibold border border-gray-300">الحالة</th>
+                      <th className="px-4 py-3 text-center text-gray-800 font-semibold border border-gray-300 hidden sm:table-cell">تاريخ الإنشاء</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {accessCodes.map((code, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-right text-gray-800 border border-gray-300">{code.teamName}</td>
+                        <td className="px-4 py-3 text-center font-mono font-bold text-blue-700 border border-gray-300">{code.code}</td>
+                        <td className="px-4 py-3 text-center border border-gray-300">
+                          {code.used ? (
+                            <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">مستخدم</span>
+                          ) : (
+                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">متاح</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-center text-sm text-gray-600 border border-gray-300 hidden sm:table-cell">
+                          {new Date(code.createdAt).toLocaleString('ar-LB')}
+                        </td>
+                      </tr>
+                    ))}
+                    {accessCodes.length === 0 && (
+                      <tr>
+                        <td colSpan="4" className="px-4 py-8 text-center text-gray-500 border border-gray-300">
+                          لا توجد رموز منشأة بعد
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
           {/* Teams Results */}
           <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
             <h2 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2 text-gray-900">
@@ -422,38 +489,48 @@ const handleAdminLogin = () => {
             </h2>
             <div className="overflow-x-auto -mx-4 sm:mx-0">
               <div className="inline-block min-w-full align-middle">
-                <table className="min-w-full">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="px-2 sm:px-4 py-3 text-right text-gray-900 font-semibold">الترتيب</th>
-                      <th className="px-2 sm:px-4 py-3 text-right text-gray-900 font-semibold">الفريق</th>
-                      <th className="px-2 sm:px-4 py-3 text-center text-gray-900 font-semibold">النتيجة</th>
-                      <th className="px-2 sm:px-4 py-3 text-center text-gray-900 font-semibold hidden sm:table-cell">النسبة</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {teams.map((team, idx) => (
-                      <tr key={idx} className="border-b hover:bg-gray-50">
-                        <td className="px-2 sm:px-4 py-3 font-bold text-gray-900">{idx + 1}</td>
-                        <td className="px-2 sm:px-4 py-3 text-gray-900">{team.name}</td>
-                        <td className="px-2 sm:px-4 py-3 text-center font-semibold text-gray-900">
-                          {team.score} / {team.totalQuestions}
-                        </td>
-                        <td className="px-2 sm:px-4 py-3 text-center text-gray-700 hidden sm:table-cell">
-                          {Math.round((team.score / team.totalQuestions) * 100)}%
-                        </td>
-                      </tr>
-                    ))}
-                    {teams.length === 0 && (
-                      <tr>
-                        <td colSpan="4" className="px-4 py-8 text-center text-gray-500">
-                          لا توجد فرق بعد
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+               <table className="min-w-full border-collapse">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-2 sm:px-4 py-3 text-right text-gray-800 font-semibold border border-gray-300">الترتيب</th>
+                  <th className="px-2 sm:px-4 py-3 text-right text-gray-800 font-semibold border border-gray-300">الفريق</th>
+                  <th className="px-2 sm:px-4 py-3 text-center text-gray-800 font-semibold border border-gray-300">النتيجة</th>
+                  <th className="px-2 sm:px-4 py-3 text-center text-gray-800 font-semibold border border-gray-300 hidden sm:table-cell">النسبة</th>
+                  <th className="px-2 sm:px-4 py-3 text-center text-gray-800 font-semibold border border-gray-300 hidden md:table-cell">وقت الإنتهاء</th>
+                </tr>
+              </thead>
+              <tbody>
+                {teams.map((team, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-2 sm:px-4 py-3 font-bold text-gray-800 border border-gray-300">{idx + 1}</td>
+                    <td className="px-2 sm:px-4 py-3 text-gray-800 border border-gray-300">{team.name}</td>
+                    <td className="px-2 sm:px-4 py-3 text-center font-semibold text-gray-800 border border-gray-300">
+                      {team.score} / {team.totalQuestions}
+                    </td>
+                    <td className="px-2 sm:px-4 py-3 text-center text-gray-700 border border-gray-300 hidden sm:table-cell">
+                      {Math.round((team.score / team.totalQuestions) * 100)}%
+                    </td>
+                    <td className="px-2 sm:px-4 py-3 text-center text-sm text-gray-600 border border-gray-300 hidden md:table-cell">
+                      {new Date(team.completedAt).toLocaleString('ar-LB', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </td>
+                  </tr>
+                ))}
+                {teams.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500 border border-gray-300">
+                      لا توجد فرق بعد
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>              
+            </div>
             </div>
           </div>
 
@@ -632,34 +709,58 @@ const handleAdminLogin = () => {
 
             <div className="mb-6 sm:mb-8">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 text-right leading-relaxed">{currentQuestion.question}</h2>
-              <div className="space-y-3 sm:space-y-4">
-                {currentQuestion.options.map((option, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleAnswerSelect(idx)}
-                    className={`w-full p-3 sm:p-4 text-right rounded-xl border-2 transition text-base sm:text-lg ${
-                      selectedAnswer === idx
-                        ? 'bg-emerald-100 border-emerald-500 font-semibold text-gray-900'
-                        : 'bg-white bg-white border-gray-300 hover:border-emerald-300 text-gray-700'
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
+             <div className="space-y-3 sm:space-y-4">
+  {currentQuestion.options.map((option, idx) => {
+    const isSelected = selectedAnswer === idx;
+    const isCorrect = idx === currentQuestion.correctAnswer;
+    const showFeedback = showAnswerFeedback && selectedAnswer !== null;
+    
+    let buttonClass = 'w-full p-3 sm:p-4 text-right rounded-xl border-2 transition text-base sm:text-lg ';
+    
+    if (showFeedback) {
+      if (isCorrect) {
+        buttonClass += 'bg-green-100 border-green-500 text-gray-800 font-semibold';
+      } else if (isSelected) {
+        buttonClass += 'bg-red-100 border-red-500 text-gray-800 font-semibold';
+      } else {
+        buttonClass += 'bg-white border-gray-300 text-gray-700 opacity-50';
+      }
+    } else if (isSelected) {
+      buttonClass += 'bg-emerald-100 border-emerald-500 font-semibold text-gray-800';
+    } else {
+      buttonClass += 'bg-white border-gray-300 hover:border-emerald-300 text-gray-700';
+    }
+    
+    return (
+      <button
+        key={idx}
+        onClick={() => !showAnswerFeedback && handleAnswerSelect(idx)}
+        disabled={showAnswerFeedback}
+        className={buttonClass}
+      >
+        {option}
+        {showFeedback && isCorrect && ' ✓'}
+        {showFeedback && isSelected && !isCorrect && ' ✗'}
+      </button>
+    );
+  })}
+</div>
             </div>
 
             <button
-              onClick={handleNext}
-              disabled={selectedAnswer === null}
-              className={`w-full py-3 sm:py-4 rounded-xl font-semibold text-white text-lg shadow-lg ${
-                selectedAnswer === null
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-emerald-600 hover:bg-emerald-700'
-              }`}
-            >
-              {currentQuestionIndex < questions.length - 1 ? 'التالي' : 'إنهاء'}
-            </button>
+  onClick={handleNext}
+  disabled={selectedAnswer === null && !showAnswerFeedback}
+  className={`w-full py-3 sm:py-4 rounded-xl font-semibold text-white text-lg shadow-lg ${
+    selectedAnswer === null && !showAnswerFeedback
+      ? 'bg-gray-400 cursor-not-allowed'
+      : 'bg-emerald-600 hover:bg-emerald-700'
+  }`}
+>
+  {showAnswerFeedback 
+    ? (currentQuestionIndex < questions.length - 1 ? 'التالي' : 'إنهاء')
+    : 'تأكيد الإجابة'
+  }
+</button>
           </div>
         </div>
       </div>
