@@ -138,7 +138,7 @@ app.post('/v1/teams', async (req, res) => {
 });
 
 // Get all access codes
-app.get('/v1/access', async (req, res) => {
+router.get('/access', async (req, res) => {
   await connectDB();
   try {
     const codes = await AccessCode.find().sort({ createdAt: -1 });
@@ -148,7 +148,6 @@ app.get('/v1/access', async (req, res) => {
   }
 });
 
-// Generate or retrieve access code for a team
 // Generate or retrieve access code for a team
 router.post('/access', async (req, res) => {
   await connectDB();
@@ -178,7 +177,7 @@ router.post('/access', async (req, res) => {
     // Generate new code
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
     const accessCode = new AccessCode({ 
-      teamName: teamName.trim(), // Keep original case for display
+      teamName: teamName.trim(),
       code 
     });
     await accessCode.save();
@@ -192,6 +191,7 @@ router.post('/access', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Mark code as used
 app.put('/v1/access/:code', async (req, res) => {
@@ -250,4 +250,5 @@ app.delete('/v1/data/reset', async (req, res) => {
   }
 });
 
+app.use('/v1', router);
 module.exports.handler = serverless(app);
